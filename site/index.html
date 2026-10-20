@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hazptr</title>
+  <meta name="description" content="Things hazptr builds in public: Neiro, keiyoushi status, rhythm game hardware and self-hosted tools.">
+  <meta name="theme-color" content="#07090f">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/base.css">
+  <style>
+    :root { --accent: #8b7cff; --accent-2: #2dd4bf; --glow: rgba(139, 124, 255, 0.4); }
+    .hero h1 { font-family: "JetBrains Mono", ui-monospace, monospace; letter-spacing: -0.06em; }
+    .caret { display: inline-block; width: 0.08em; height: 0.8em; margin-left: 0.06em; vertical-align: -0.05em; background: var(--accent-2); animation: blink 1.1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .featured { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .featured .card { min-height: 220px; padding: 28px; }
+    .featured .card img { width: 64px; height: 64px; margin-bottom: 16px; transform: translateZ(50px); filter: drop-shadow(0 12px 24px rgba(0,0,0,.4)); }
+    .card .arrow { position: absolute; top: 22px; right: 22px; color: var(--muted); transition: transform .3s, color .3s; transform: translateZ(40px); }
+    .card:hover .arrow { color: var(--accent-2); transform: translateZ(40px) translate(3px, -3px); }
+    .lang-dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--accent); }
+    .empty { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="grain"></div>
+
+  <nav class="nav">
+    <a class="brand" href="./">hazptr</a>
+    <div class="links">
+      <a href="#projects" class="hide-sm">Projects</a>
+      <a href="https://github.com/hazptr">GitHub</a>
+      <button type="button" class="sound-toggle" data-sound-toggle aria-pressed="false" title="Play a note when a bubble pops">♪ Sound</button>
+    </div>
+  </nav>
+
+  <header class="hero wrap">
+    <div>
+      <h1>hazptr<span class="caret" aria-hidden="true"></span></h1>
+      <p class="lead">Stuff i build in public. Manga reader things, rhythm game hardware, and a few self-hosted tools.</p>
+      <div class="actions">
+        <a class="btn primary" href="#projects" data-magnetic>See projects</a>
+        <a class="btn" href="https://github.com/hazptr" data-magnetic>GitHub</a>
+      </div>
+      <p class="hint">Bubbles move out of your way. Click one to pop it, hold to pull them in.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="projects">
+      <span class="eyebrow reveal">Featured</span>
+      <h2 class="reveal">Reading</h2>
+      <div class="grid featured">
+        <a class="card reveal" data-tilt href="https://hazptr.github.io/neiro/">
+          <span class="arrow" aria-hidden="true">↗</span>
+          <img src="assets/neiro.svg" alt="">
+          <h3>Neiro</h3>
+          <p>Mihon, with background music for sources that provide it.</p>
+          <div class="meta"><span class="chip accent">Android</span><span class="chip">Kotlin</span></div>
+        </a>
+        <a class="card reveal" data-tilt href="https://hazptr.github.io/neiro-extensions/">
+          <span class="arrow" aria-hidden="true">↗</span>
+          <div class="icon" aria-hidden="true">♫</div>
+          <h3>Neiro extensions</h3>
+          <p>Extension store for Neiro, with the sources that play music.</p>
+          <div class="meta"><span class="chip accent">Extension store</span></div>
+        </a>
+        <a class="card reveal" data-tilt href="https://hazptr.github.io/keiyoushi-monitor/">
+          <span class="arrow" aria-hidden="true">↗</span>
+          <div class="icon" aria-hidden="true">◉</div>
+          <h3>keiyoushi status</h3>
+          <p>Daily smoke checks of every keiyoushi extension, run on GitHub Actions.</p>
+          <div class="meta"><span class="chip accent">Status page</span><span class="chip">Updated daily</span></div>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <span class="eyebrow reveal">Everything else</span>
+      <h2 class="reveal">Other projects</h2>
+      <div class="grid" id="repos" aria-live="polite">
+        <p class="empty">Loading projects from GitHub…</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <a href="https://github.com/hazptr">github.com/hazptr</a>
+  </footer>
+
+  <script src="assets/bubbles.js"></script>
+  <script src="assets/fx.js"></script>
+  <script>
+    Bubbles.start({ palette: ['#8b7cff', '#2dd4bf', '#f5b84b', '#ff6b9a', '#5aa9ff'], glyphs: ['♪', '音', '◉', '{}'], density: 1 });
+
+    // Shown separately above, or not worth listing
+    const skip = new Set(['neiro', 'neiro-extensions', 'neiro-extensions-lib', 'keiyoushi-monitor', 'keiyoushi-status', 'hazptr.github.io']);
+    const colours = { Kotlin: '#a97bff', Python: '#3572a5', TypeScript: '#3178c6', JavaScript: '#f1e05a', 'C#': '#178600', 'C++': '#f34b7d', C: '#555555', Rust: '#dea584', Shell: '#89e051' };
+
+    function card(repo) {
+      const a = document.createElement('a');
+      a.className = 'card reveal';
+      a.dataset.tilt = '8';
+      a.href = repo.homepage || repo.html_url;
+      const lang = repo.language
+        ? `<span class="chip"><span class="lang-dot" style="background:${colours[repo.language] || 'var(--accent)'}"></span>${repo.language}</span>`
+        : '';
+      const updated = new Date(repo.pushed_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+      a.innerHTML = `<span class="arrow" aria-hidden="true">↗</span><h3></h3><p></p><div class="meta">${lang}<span class="chip">${updated}</span></div>`;
+      a.querySelector('h3').textContent = repo.name;
+      a.querySelector('p').textContent = repo.description || '';
+      return a;
+    }
+
+    fetch('https://api.github.com/users/hazptr/repos?per_page=100&sort=pushed')
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((repos) => {
+        const list = repos.filter((r) => !r.fork && !r.archived && !r.private && !skip.has(r.name));
+        const grid = document.getElementById('repos');
+        grid.replaceChildren(...list.map(card));
+        Fx.apply(grid);
+      })
+      .catch(() => {
+        document.getElementById('repos').innerHTML = '<p class="empty">Couldn\'t load the list right now, they\'re all on <a href="https://github.com/hazptr">GitHub</a>.</p>';
+      });
+  </script>
+</body>
+</html>
